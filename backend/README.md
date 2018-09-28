@@ -1,0 +1,1 @@
+This is a simple backend developed in python using the flask framework.
