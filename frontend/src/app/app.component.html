@@ -7,12 +7,17 @@
 <div class="ui action input">
   <!-- So you like to use a input variable in a method?
        Create an id using '#variableName' and then assign it to your click event using 'variableName.value' -->
-  <input #alpha type="text" value="Username">
-  <button class="ui teal right labeled icon button" (click)="doGET(alpha.value)">
+  <input #alpha type="text" placeholder="Username" value="Alpha">
+  <button class="ui teal right labeled icon button" (click)="getUsername(alpha.value)">
     <i class="search icon"></i>
     Search
   </button>
 </div>
 <p></p>
-<p *ngIf="response != null">{{ response.args | json }}</p>
-<p *ngIf="response != null">The Username is: {{ response.args.username | json }}</p>
+<!--
+  <p *ngIf="response != null">{{ response.args | json }}</p>
+  <p *ngIf="response != null">The Username is: {{ response.args.username | json }}</p>
+-->
+<p *ngIf="response != null">The Username is: {{ response.username }}</p>
+<p *ngIf="response != null">The age is: {{ response.age }}</p>
+<p *ngIf="response != null">City he lives in: {{ response.city }}</p>

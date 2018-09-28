@@ -31,4 +31,15 @@ export class AppComponent {
       );
   }
 
+  getUsername(username) {
+    let url = 'http://127.0.0.1:5000/user/' + username;
+    this.http.get(url).subscribe(
+      res => {
+        this.response = JSON.parse(res._body);
+        console.log(this.response);
+      },
+      error => console.log(error)
+    );
+  }
+
 }
