@@ -35,7 +35,7 @@ export class AppComponent {
     let url = 'http://127.0.0.1:5000/user/' + username;
     this.http.get(url).subscribe(
       res => {
-        this.response = JSON.parse(res._body);
+        this.response = JSON.parse(res._body); // res._body as JSON
         console.log(this.response);
       },
       error => console.log(error)
