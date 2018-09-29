@@ -4,25 +4,20 @@ from flask_restful import reqparse, abort, Api, Resource
 
 from datetime import datetime
 
+# importing MongoDB client
+from flask_pymongo import PyMongo
+
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+
 app = Flask(__name__)
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/todo'
+mongo = PyMongo(app)
 api = Api(app)
 
 CORS(app)
 
-#@app.route("/")
-#def hello():
-#    return "Hello World!"
-
-#@app.route('/user/<username>')
-#def show_user_profile(username):
-#    return jsonify(
-#        username=username,
-#        age=31,
-#        city='Leoben'
-#    )
-
 # Here we will add our methods for the todo list app. Storage in MongoDB
-
 TODOS = {
     '1': {'task': 'build an API'},
     '2': {'task': '?????'},
@@ -42,33 +37,57 @@ parser.add_argument('task')
 # shows a single todo item and lets you delete a todo item
 class Todo(Resource):
     def get(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        return TODOS[todo_id]
+#        abort_if_todo_doesnt_exist(todo_id)
+#        return TODOS[todo_id]
+#        query = mongo.db.todo.count()
+        query = mongo.db.todo.find(
+#            {"task": 'Charlie'}
+            {"_id": int(todo_id)}
+        )
+        return dumps(query)
 
     def delete(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        del TODOS[todo_id]
-        return '', 204
+        query = mongo.db.todo.remove(
+#            {"task": todo_id}
+#            {"$or":[ {"_id": int(todo_id)}, {"_id": ObjectId(todo_id)}]}
+            {"$or":[ {"_id": int(todo_id)}]}
+        )
+        return dumps(query), 204
 
     def put(self, todo_id):
-        args = parser.parse_args()
-        task = {'task': args['task']}
-        TODOS[todo_id] = {task, DateTime}
-        return task, 201
-
+        '''
+        Function to update the user.
+        '''
+        data = parser.parse_args()
+        query = mongo.db.todo.update(
+            {"_id": int(todo_id)},
+            {'task' : data['task']})
+        return dumps(query)
 
 # TodoList
 # shows a list of all todos, and lets you POST to add new tasks
 class TodoList(Resource):
     def get(self):
-        return TODOS
+        query = mongo.db.todo.find()
+        return dumps(query)
 
     def post(self):
-        args = parser.parse_args()
-        todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-        todo_id = '%i' % todo_id
-        TODOS[todo_id] = {'task': args['task'], 'creation':datetime.now().isoformat()}
-        return TODOS[todo_id], 201
+        data = parser.parse_args()
+#        args = parser.parse_args()
+        task = data['task']
+        todo_id = int(mongo.db.todo.count()) + 1
+        try:
+            status = mongo.db.todo.insert({
+                "_id": todo_id,
+                'task' : task,
+                'created' : datetime.now().isoformat()
+            })
+            return dumps('Success')
+        except Exception as e:
+            return dumps({'error' : str(e)})
+
+#        TODOS[todo_id] = {'task': args['task'], 'creation':datetime.now().isoformat()}
+#        return TODOS[todo_id], 201
 
 ##
 ## Actually setup the Api resource routing here
